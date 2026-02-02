@@ -208,12 +208,14 @@ const HomePage = ({ properties }: HomePageProps) => {
   );
 };
 
-export const getServerSideProps: GetServerSideProps = async () => {
+export const getServerSideProps: GetServerSideProps = async ({ req }) => {
   try {
-    // Fetch from your local API
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/api/properties`,
-    );
+    // Get the base URL dynamically
+    const protocol = req.headers["x-forwarded-proto"] || "http";
+    const host = req.headers.host;
+    const baseUrl = `${protocol}://${host}`;
+
+    const res = await fetch(`${baseUrl}/api/properties`);
 
     if (!res.ok) {
       throw new Error("Failed to fetch properties");
@@ -228,6 +230,7 @@ export const getServerSideProps: GetServerSideProps = async () => {
     };
   } catch (error) {
     console.error("Error fetching properties:", error);
+    // Return empty array as fallback
     return {
       props: {
         properties: [],

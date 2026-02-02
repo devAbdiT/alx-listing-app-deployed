@@ -178,11 +178,15 @@ const PropertyDetailPage = ({ property }: PropertyPageProps) => {
 
 export const getServerSideProps: GetServerSideProps = async (context) => {
   const { id } = context.params as { id: string };
+  const { req } = context;
 
   try {
-    const res = await fetch(
-      `${process.env.NEXT_PUBLIC_API_URL || "http://localhost:3000"}/api/properties/${id}`,
-    );
+    // Get the base URL dynamically
+    const protocol = req?.headers["x-forwarded-proto"] || "http";
+    const host = req?.headers.host;
+    const baseUrl = `${protocol}://${host}`;
+
+    const res = await fetch(`${baseUrl}/api/properties/${id}`);
 
     if (!res.ok) {
       return {
